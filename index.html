@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/index.css">
 </head>
+
 <body>
     <header>
         <div class="header-content">
@@ -25,14 +27,14 @@
             </div>
         </div>
     </header>
-    
+
     <main class="container">
         <section class="search-section">
             <div class="search-container">
                 <input type="text" class="search-input" placeholder="搜索小说名称、作者..." id="searchInput">
                 <button class="search-btn" id="searchBtn"><i class="fas fa-search"></i> <span>搜索</span></button>
             </div>
-            
+
             <div class="pagination-controls">
                 <button class="pagination-btn" id="prevPageBtn" disabled>
                     <i class="fas fa-chevron-left"></i> <span>上一页</span>
@@ -43,7 +45,7 @@
                 </button>
             </div>
         </section>
-        
+
         <section class="tab-content active" id="allBooksTab">
             <div class="books-grid" id="booksContainer">
                 <!-- 书籍卡片将由JavaScript动态生成 -->
@@ -52,7 +54,7 @@
                 <i class="fas fa-spinner fa-spin"></i> 加载中...
             </div>
         </section>
-        
+
         <section class="tab-content" id="favoritesTab">
             <div class="stats-bar">
                 <h3>我的收藏</h3>
@@ -68,11 +70,11 @@
             </div>
         </section>
     </main>
-    
+
     <footer>
         <div class="footer-content">
             <div class="contact-info">
-                <a href="https://afdian.com/a/ahustudio" class="contact-item">
+                <a href="https://afdian.com/a/hukastudio" class="contact-item">
                     <i class="fas fa-star"></i>
                     <span>赞助我们</span>
                 </a>
@@ -84,15 +86,17 @@
                     <i class="fab fa-github"></i>
                     <span>GitHub</span>
                 </a>
+                <a target="_blank" class="contact-item">本站总访问量 <span id="busuanzi_site_pv">加载中...</span> 次</a>
+                <a target="_blank" class="contact-item">本站总访客数 <span id="busuanzi_site_uv">加载中...</span> 人</a>
             </div>
             <p class="copyright">© 2025 HuKaBook. 保留所有权利。</p>
         </div>
     </footer>
-    
+
     <button class="back-to-top" id="backToTop">
         <i class="fas fa-arrow-up"></i>
     </button>
-    
+    <script src="//api.busuanzi.cc/static/3.6.9/busuanzi.min.js" defer></script>
     <script>
         // 配置项
         const config = {
@@ -100,7 +104,7 @@
             dataFolder: 'book_file',
             defaultCover: 'assets/images/default-book.jpg'
         };
-        
+
         // 状态管理
         const state = {
             currentPage: 1,
@@ -111,7 +115,7 @@
             favorites: JSON.parse(localStorage.getItem('foxbook_favorites')) || {},
             currentTab: 'all' // 'all' 或 'favorites'
         };
-        
+
         // DOM元素
         const elements = {
             booksContainer: document.getElementById('booksContainer'),
@@ -130,7 +134,7 @@
             allBooksBtn: document.getElementById('allBooksBtn'),
             favoritesBtn: document.getElementById('favoritesBtn')
         };
-        
+
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             loadBooks();
@@ -138,46 +142,49 @@
             renderFavorites();
             updateFavoritesCount();
         });
-        
+
         // 设置事件监听
         function setupEventListeners() {
             elements.searchBtn.addEventListener('click', handleSearch);
             elements.searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') handleSearch();
             });
-            
+
             elements.prevPageBtn.addEventListener('click', () => {
                 if (state.currentPage > 1) {
                     state.currentPage--;
                     loadBooks();
                 }
             });
-            
+
             elements.nextPageBtn.addEventListener('click', () => {
                 if (state.currentPage < state.totalPages) {
                     state.currentPage++;
                     loadBooks();
                 }
             });
-            
+
             elements.backToTop.addEventListener('click', () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
             });
-            
+
             window.addEventListener('scroll', () => {
                 const scrollPosition = window.scrollY;
                 elements.backToTop.classList.toggle('visible', scrollPosition > 300);
             });
-            
+
             // 标签切换事件
             elements.allBooksBtn.addEventListener('click', () => switchTab('all'));
             elements.favoritesBtn.addEventListener('click', () => switchTab('favorites'));
         }
-        
+
         // 切换标签页
         function switchTab(tab) {
             state.currentTab = tab;
-            
+
             if (tab === 'all') {
                 elements.allBooksTab.classList.add('active');
                 elements.favoritesTab.classList.remove('active');
@@ -191,17 +198,17 @@
                 renderFavorites();
             }
         }
-        
+
         // 加载书籍数据
         async function loadBooks() {
             if (state.isLoading) return;
-            
+
             state.isLoading = true;
             showLoading();
-            
+
             try {
                 let data = [];
-                
+
                 if (state.searchQuery) {
                     // 搜索模式 - 从所有数据中过滤
                     const allBooks = await loadAllBooks();
@@ -212,12 +219,12 @@
                     // 普通模式 - 加载当前页数据
                     const response = await fetch(`${config.dataFolder}/page${state.currentPage}.json`);
                     if (!response.ok) throw new Error('数据加载失败');
-                    
+
                     data = await response.json();
                     state.booksData = data;
                     state.totalPages = await getTotalPages();
                 }
-                
+
                 displayBooks(data);
                 updatePagination();
             } catch (error) {
@@ -228,41 +235,41 @@
                 hideLoading();
             }
         }
-        
+
         // 加载所有书籍数据（用于搜索）
         async function loadAllBooks() {
             try {
                 const allBooks = [];
                 let page = 1;
                 let hasMore = true;
-                
+
                 while (hasMore) {
                     const response = await fetch(`${config.dataFolder}/page${page}.json`);
                     if (!response.ok) break;
-                    
+
                     const data = await response.json();
                     allBooks.push(...data);
-                    
+
                     if (data.length < config.booksPerPage) {
                         hasMore = false;
                     } else {
                         page++;
                     }
                 }
-                
+
                 return allBooks;
             } catch (error) {
                 console.error('加载所有数据出错:', error);
                 return [];
             }
         }
-        
+
         // 获取总页数
         async function getTotalPages() {
             try {
                 const response = await fetch(`${config.dataFolder}/_info.json`);
                 if (!response.ok) return 1;
-                
+
                 const info = await response.json();
                 return Math.ceil(info.totalBooks / config.booksPerPage);
             } catch (error) {
@@ -270,7 +277,7 @@
                 return 1;
             }
         }
-        
+
         // 过滤书籍（搜索功能）
         function filterBooks(books, query) {
             const lowerQuery = query.toLowerCase();
@@ -282,11 +289,11 @@
                 );
             });
         }
-        
+
         // 显示书籍
         function displayBooks(books) {
             elements.booksContainer.innerHTML = '';
-            
+
             if (books.length === 0) {
                 elements.booksContainer.innerHTML = `
                     <div class="no-results">
@@ -297,20 +304,20 @@
                 `;
                 return;
             }
-            
+
             // 计算当前页的起始索引
             const startIndex = (state.currentPage - 1) * config.booksPerPage;
             const endIndex = startIndex + config.booksPerPage;
-            const pageBooks = state.searchQuery 
-                ? books.slice(startIndex, endIndex)
-                : books;
-            
+            const pageBooks = state.searchQuery ?
+                books.slice(startIndex, endIndex) :
+                books;
+
             const fragment = document.createDocumentFragment();
-            
+
             pageBooks.forEach(book => {
                 const bookId = generateBookId(book);
                 const isFavorite = state.favorites[bookId];
-                
+
                 const bookCard = document.createElement('a');
                 bookCard.href = book.link || '#';
                 bookCard.className = 'book-card';
@@ -336,28 +343,28 @@
                 `;
                 fragment.appendChild(bookCard);
             });
-            
+
             elements.booksContainer.appendChild(fragment);
-            
+
             // 添加收藏事件监听
             document.querySelectorAll('.book-favorite').forEach(btn => {
                 btn.addEventListener('click', toggleFavorite);
             });
         }
-        
+
         // 生成书籍唯一ID
         function generateBookId(book) {
             return `${book.name}-${book.author}`.replace(/\s+/g, '_');
         }
-        
+
         // 切换收藏状态
         function toggleFavorite(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             const btn = e.currentTarget;
             const bookId = btn.dataset.id;
-            
+
             if (state.favorites[bookId]) {
                 delete state.favorites[bookId];
                 btn.classList.remove('active');
@@ -365,37 +372,37 @@
                 state.favorites[bookId] = true;
                 btn.classList.add('active');
             }
-            
+
             // 保存到localStorage
             localStorage.setItem('foxbook_favorites', JSON.stringify(state.favorites));
-            
+
             updateFavoritesCount();
-            
+
             // 如果当前在收藏页面，更新显示
             if (state.currentTab === 'favorites') {
                 renderFavorites();
             }
         }
-        
+
         // 更新收藏数量显示
         function updateFavoritesCount() {
             const count = Object.keys(state.favorites).length;
             elements.favoritesCount.textContent = `${count} 本书`;
         }
-        
+
         // 渲染收藏书籍
         function renderFavorites() {
             elements.favoritesContainer.innerHTML = '';
-            
+
             const favoriteIds = Object.keys(state.favorites);
-            
+
             if (favoriteIds.length === 0) {
                 elements.noFavoritesMessage.style.display = 'block';
                 return;
             }
-            
+
             elements.noFavoritesMessage.style.display = 'none';
-            
+
             // 从所有书籍中找出收藏的书籍
             const favoriteBooks = [];
             state.booksData.forEach(book => {
@@ -404,12 +411,12 @@
                     favoriteBooks.push(book);
                 }
             });
-            
+
             const fragment = document.createDocumentFragment();
-            
+
             favoriteBooks.forEach(book => {
                 const bookId = generateBookId(book);
-                
+
                 const bookCard = document.createElement('a');
                 bookCard.href = book.link || '#';
                 bookCard.className = 'book-card';
@@ -435,46 +442,46 @@
                 `;
                 fragment.appendChild(bookCard);
             });
-            
+
             elements.favoritesContainer.appendChild(fragment);
-            
+
             // 添加收藏事件监听
             document.querySelectorAll('.book-favorite').forEach(btn => {
                 btn.addEventListener('click', toggleFavorite);
             });
         }
-        
+
         // 更新分页控件
         function updatePagination() {
             elements.pageInfo.textContent = `第 ${state.currentPage} 页 / 共 ${state.totalPages} 页`;
             elements.prevPageBtn.disabled = state.currentPage <= 1;
             elements.nextPageBtn.disabled = state.currentPage >= state.totalPages;
         }
-        
+
         // 处理搜索
         function handleSearch() {
             const query = elements.searchInput.value.trim();
-            
+
             if (query === state.searchQuery) return;
-            
+
             state.searchQuery = query;
             state.currentPage = 1;
-            
+
             loadBooks();
         }
-        
+
         // 显示加载状态
         function showLoading() {
             elements.loadingIndicator.style.display = 'block';
             elements.booksContainer.style.opacity = '0.5';
         }
-        
+
         // 隐藏加载状态
         function hideLoading() {
             elements.loadingIndicator.style.display = 'none';
             elements.booksContainer.style.opacity = '1';
         }
-        
+
         // 显示错误信息
         function showError(message) {
             elements.booksContainer.innerHTML = `
@@ -486,4 +493,5 @@
         }
     </script>
 </body>
+
 </html>
