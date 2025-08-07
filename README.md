@@ -1,4 +1,4 @@
-# 📚 HuKaBook小说漫画导航 
+[网站链接](http://foxbook.logarh.xyz)
 
 ## 🚀 网站介绍
 
