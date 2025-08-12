@@ -86,7 +86,7 @@
                     <i class="fab fa-github"></i>
                     <span>GitHub</span>
                 </a>
-             </div>
+            </div>
             <p class="copyright">© 2025 HuKaBook. 保留所有权利。</p>
         </div>
     </footer>
@@ -450,7 +450,7 @@
 
         // 更新分页控件
         function updatePagination() {
-            elements.pageInfo.textContent = `第 ${state.currentPage} 页 / 共 ${state.totalPages} 页`;
+            elements.pageInfo.textContent = `第${state.currentPage}页/共${state.totalPages}页`;
             elements.prevPageBtn.disabled = state.currentPage <= 1;
             elements.nextPageBtn.disabled = state.currentPage >= state.totalPages;
         }
